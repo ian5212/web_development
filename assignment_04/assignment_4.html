@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <title>Design Your own Hogwarts!</title>
+    <style type="text/css">
+      body {
+        font-family: Georgia, 'Times New Roman', Times, serif;
+      }
+
+      #grid-container {
+        display: grid;
+        grid-template-columns: repeat(10, 1fr);
+        grid-template-rows: repeat(10, 1fr);
+        width: 320px;
+        height: 320px;
+        border: 1px solid black;
+      }
+
+      .grid-tile {
+        width: 32px;
+        height: 32px;
+        border: 1px solid transparent;
+        box-sizing: border-box;
+      }
+
+      .grid-tile:hover {
+        border: 1px solid red;
+      }
+
+      .tile-picker-img {
+        height: 32px;
+        width: 32px;
+        border: 2px solid transparent;
+        box-sizing: border-box;
+      }
+
+      .tile-picker-img.selected {
+        border-color: pink;
+      }
+
+      #mega-container {
+        display: flex;
+      }
+
+      #tile-picker {
+        display: inline-block;
+        width: 1150px;
+        padding-left: 35px;
+      }
+    </style>
+  </head>
+
+  <body>
+    <h1>Design Your Own Hogwarts!</h1>
+
+    <div id="mega-container">
+      
+      <div id="grid-container"></div>
+
+      
+      <div id="tile-picker">
+        <h2>Click on a tile here to select it. Then click on the map to the left to place the tile!</h2>
+        <hr>
+      </div>
+    </div>
+
+    
+    <script src="image_array.js"></script>
+    <script>
+      const tileArray = array_library; // from image_array.js
+      let tileHolder = '';
+      let previousTile = null;
+
+      
+      const grid = document.getElementById('grid-container');
+
+      
+      for (let i = 0; i < 100; i++) {
+        const miniDiv = document.createElement('div');
+        miniDiv.className = 'grid-tile';
+        grid.appendChild(miniDiv);
+
+        miniDiv.addEventListener('click', function () {
+          if (tileHolder) {
+            miniDiv.style.backgroundImage = `url('${tileHolder}')`;
+            miniDiv.style.backgroundSize = 'cover';
+          }
+        });
+      }
+
+      
+      const tilePicker = document.getElementById('tile-picker');
+
+      
+      tileArray.forEach((src, index) => {
+        const tile = document.createElement('img');
+        tile.src = src;
+        tile.className = 'tile-picker-img';
+        tilePicker.appendChild(tile);
+
+        tile.addEventListener('click', function () {
+          if (previousTile && previousTile !== tile) {
+            previousTile.classList.remove('selected');
+          }
+          tile.classList.add('selected');
+          previousTile = tile;
+          tileHolder = src;
+        });
+      });
+    </script>
+  </body>
+</html>

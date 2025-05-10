@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Gotta Catch 'em All</title>
+        <style>
+            #left {
+                width: 800px;
+                height: 600px;
+                float: left;
+                position: relative;
+            }
+            #background {
+                width: 100%;
+            }
+            .grass {
+                position: absolute;
+                z-index: 1;
+            }
+            #grass1 {
+                bottom: 0px;
+                left: 0px;
+            }
+            #grass2 {
+                bottom: 0px;
+                left: 275px;
+            }
+            #grass3 {
+                bottom: 0px;
+                right: 0px;
+            }
+            .grass:hover {
+                background-color: rgba(255, 255, 0, 0.5);
+            }
+        </style>
+    </head>
+    <body style="background-color:rgba(255, 255, 0, 0.5);font-family: Arial, Helvetica, sans-serif;">
+        <div id="container">
+            <div id="left">
+                <img id="background" src="images/environment_forestbackground.png">
+                <img id="grass1" class="grass" src="images/grass.png">
+                <img id="grass2" class="grass" src="images/grass.png">
+                <img id="grass3" class="grass" src="images/grass.png">
+            </div>
+            <div id="right">
+    
+                <h1>Gotta Catch 'em All</h1>
+                <p>Instructions: <br> Select a patch of grass to reveal either a pokemon, a pokeball, or nothing.
+                You may only select one patch at a time, and after you select a patch, you can hit the play Again
+                button to try again! But be aware. as you only have a limited amount of pokeballs, and if the number of
+                pokeballs reach zero, you will not be able to select anymore patches.
+        <br>
+            Additionally, there is a chance you may enter "Special Mode" where they are rare pokemon and items hidden
+            in the patches.
+        <br>
+        <br>
+            Use the clear button to clear your result history, and use the start over button to refill your pokeballs.
+                </p>
+                <h2>Results</h2>
+                <p id="results">You caught a ...</p>
+                <p>Pokeballs left: <span id="pokeballs_left">5</span></p>
+                <p>Pokemon caught: <span id="pokemon_caught">0</span></p>
+                <button id="button_playagain" style="display: none;">Play Again</button>
+            </div>
+
+        </div>
+
+        <script>
+
+            const pokemon = [
+            {name:'Pikachu', image:'images/pikachu.png'}, 
+            {name:'Bulbasaur', image:'images/bulbasaur.png'},
+            {name:'Charmander', image:'images/charmander.png'},
+            {name:'Eevee', image:'images/eevee.png'},
+            {name:'Squirtle', image:'images/squirtle.png'},
+            {name: 'Fennekin', image: 'images/fennekin.png'},
+            {name: 'Munchlax', image: 'images/munchlax.png'}
+            ]
+            // define all DOM elements that we plan on using
+            const grass1 = document.getElementById('grass1');
+            const grass2 = document.getElementById('grass2');
+            const grass3 = document.getElementById('grass3');
+            const results = document.getElementById('results');
+            const pokeballs_left = document.getElementById('pokeballs_left');
+            const pokemon_caught = document.getElementById('pokemon_caught');
+            const button_playagain = document.getElementById('button_playagain');
+
+            // variables to keep track of game state
+            let pokeballsLeft = 5;
+            let pokemonCaught = 0;
+            let numGen = Math.floor(Math.random()*5);
+            let specialNum = parseInt(Math.floor(Math.random()*10));
+            let ballNum = Math.floor(Math.random()*1);
+            let ballIncrease = [2,4]
+            let resultsText = document.getElementById('results');
+            let ballArray = ['images/pokeballs.png', 'images/greatball.png'];
+
+            grass1Bool = true;
+            grass2Bool = true;
+            grass3Bool = true;
+            specialMode = false;
+
+            let specialText = document.querySelector('h1');
+
+            if (specialNum > 5){
+                specialMode = true;
+                specialText.innerText = 'Gotta Catch \'em\' All: Special Mode';
+                numGen = parseInt(Math.floor(Math.random()*7));
+                ballNum = Math.floor(Math.random()*2);
+                document.body.style.backgroundColor = '#90EE90';
+            }
+            console.log(specialNum);
+            console.log(specialMode);
+            console.log(ballNum);
+            gameMode = true;
+            if (gameMode === false){
+                grass1Bool === false;
+                grass2Bool === false;
+                grass3Bool === false;
+            }
+            
+
+            
+            button_playagain.onclick = function() {
+                
+                if (pokeballsLeft >= 1){
+                grass1.src = 'images/grass.png';
+                grass2.src = 'images/grass.png';
+                grass3.src = 'images/grass.png';
+
+                
+                button_playagain.style.display = 'none';
+                gameMode = true;
+                grass1Bool = true;
+                grass2Bool = true;
+                grass3Bool = true;
+                }
+                numGen = Math.floor(Math.random()*5);
+                if (specialMode === true){
+                    numGen = Math.floor(Math.random()*7);
+                }
+            }
+
+            if (pokeballsLeft === 0){
+            
+            }
+            clear_button = document.createElement('button');
+            clear_button.innerText = 'clear button';
+            clear_button.style.display = 'in-line'
+            parentDiv = document.getElementById('right');
+            parentDiv.insertBefore(clear_button, button_playagain);
+
+            clear_button.onclick = function(){
+            let history = document.querySelectorAll('#history');
+            for (let i = 0; i < history.length; i++) {
+                history[i].remove(); 
+                }
+            }
+
+            so_button = document.createElement('button');
+            so_button.innerText = 'start over';
+            so_button.style.display = 'in-line'
+            parentDiv = document.getElementById('right');
+            parentDiv.insertBefore(so_button, button_playagain);
+            so_button.onclick = function(){
+            let history = document.querySelectorAll('#history');
+            for (let i = 0; i < history.length; i++) {
+                history[i].remove(); 
+                };
+            pokeballsLeft = 5;
+            pokeballs_left.innerText = pokeballsLeft;
+            pokemonCaught = 0;
+            pokemon_caught.innerText = pokemonCaught;
+            grass1Bool = true;
+            grass2Bool = true;
+            grass3Bool = true;
+            grass1.src = 'images/grass.png';
+            grass2.src = 'images/grass.png';
+            grass3.src = 'images/grass.png';
+            gameMode = true;
+            }
+            
+            
+            grass1.onclick = function() {
+                if (gameMode === true){
+               if (grass1Bool === true && pokeballsLeft > 0){
+                
+                pokeballsLeft -= 1;
+                pokeballs_left.innerText = pokeballsLeft;
+
+                
+                let chance = Math.random(); 
+
+                
+                if (chance > 0.6) {
+                    grass1.src = `${pokemon[numGen].image}`;         
+                    resultsText.innerText = `You caught a(n) ${pokemon[numGen].name}`;
+                    pokemonCaught += 1;
+                    pokemon_caught.innerText = pokemonCaught;  
+                    grass1Bool = false;
+                    gameMode = false;
+                    console.log(gameMode);
+                    console.log(grass2Bool);
+                    console.log(grass1Bool);
+                    resultsText2 = document.createElement('div');
+                    resultsText2.id = 'history'
+                    resultsText2.innerText = `You caught ${pokemon[numGen].name}`
+                    parentYes = document.getElementById('button_playagain');
+                    if (parentYes.nextSibling) {
+                    parentYes.parentNode.insertBefore(resultsText2, parentYes.nextSibling);
+                    }
+                    else {
+                    parentYes.parentNode.appendChild(resultsText2);
+                    }
+                }
+
+                
+                else if (chance >= 0.3) { 
+                    resultsText.innerText = 'You caught pokeballs!';
+                    grass1.src = `${ballArray[ballNum]}`;                       
+                    pokeballsLeft += parseInt(ballIncrease[ballNum]);
+                    pokeballs_left.innerText = pokeballsLeft;
+                    grass1Bool = false; 
+                    gameMode = false;
+                    resultsText2 = document.createElement('div');
+                    resultsText2.id = 'history';
+                    resultsText2.innerText = `You caught pokeballs`
+                    parentYes = document.getElementById('button_playagain');
+                    if (parentYes.nextSibling) {
+                    parentYes.parentNode.insertBefore(resultsText2, parentYes.nextSibling);
+                    }
+                    else {
+                    parentYes.parentNode.appendChild(resultsText2);
+                    }
+                    console.log(gameMode);
+                    console.log(grass2Bool);
+                    console.log(grass1Bool);
+                }
+
+               
+                else {
+                    grass1.src = ''; 
+                    resultsText.innerText = 'You caught nothing :(';
+                    gameMode = false;
+                    resultsText2 = document.createElement('div');
+                    resultsText2.id = 'history';
+                    resultsText2.innerText = `You caught nothing`
+                    parentYes = document.getElementById('button_playagain');
+                    if (parentYes.nextSibling) {
+                    parentYes.parentNode.insertBefore(resultsText2, parentYes.nextSibling);
+                    }
+                    else {
+                    parentYes.parentNode.appendChild(resultsText2);
+                    }  
+                    console.log(gameMode); 
+                    console.log(grass2Bool); 
+                    console.log(grass1Bool);                      
+                }   
+
+
+                
+                button_playagain.style.display = 'block'; 
+                }
+                }      
+            }
+
+            grass2.onclick = function() {
+                if (gameMode === true){
+               if (grass2Bool === true && pokeballsLeft > 0){
+                
+                pokeballsLeft -= 1;
+                pokeballs_left.innerText = pokeballsLeft;
+
+                
+                let chance = Math.random(); 
+
+                // 33% of a pokemon
+                if (chance > 0.6) {
+                    grass2.src = `${pokemon[numGen].image}`;         
+                    resultsText.innerText = `You caught a(n) ${pokemon[numGen].name}`;
+                    pokemonCaught += 1;
+                    pokemon_caught.innerText = pokemonCaught;  
+                    grass2Bool = false;
+                    gameMode = false;
+                    resultsText2 = document.createElement('div');
+                    resultsText2.id = 'history';
+                    resultsText2.innerText = `You caught ${pokemon[numGen].name}`
+                    parentYes = document.getElementById('button_playagain');
+                    if (parentYes.nextSibling) {
+                    parentYes.parentNode.insertBefore(resultsText2, parentYes.nextSibling);
+                    }
+                    else {
+                    parentYes.parentNode.appendChild(resultsText2);
+                    }
+                }
+
+                
+                else if (chance >= 0.3) {
+                    resultsText.innerText = 'You caught pokeballs!'; 
+                    grass2.src = `${ballArray[ballNum]}`;                       
+                    pokeballsLeft += parseInt(ballIncrease[ballNum]);
+                    pokeballs_left.innerText = pokeballsLeft;
+                    grass2Bool = false; 
+                    gameMode = false;
+                    resultsText2 = document.createElement('div');
+                    resultsText2.id = 'history';
+                    resultsText2.innerText = `You caught pokeballs`
+                    parentYes = document.getElementById('button_playagain');
+                    if (parentYes.nextSibling) {
+                    parentYes.parentNode.insertBefore(resultsText2, parentYes.nextSibling);
+                    }
+                    else {
+                    parentYes.parentNode.appendChild(resultsText2);
+                    }
+                }
+
+                
+                else {
+                    grass2.src = ''; 
+                    resultsText.innerText = 'You caught nothing :(';
+                    gameMode = false;      
+                    resultsText2 = document.createElement('div');
+                    resultsText2.id = 'history';
+                    resultsText2.innerText = `You caught nothing`
+                    parentYes = document.getElementById('button_playagain');
+                    if (parentYes.nextSibling) {
+                    parentYes.parentNode.insertBefore(resultsText2, parentYes.nextSibling);
+                    }
+                    else {
+                    parentYes.parentNode.appendChild(resultsText2);
+                    }                      
+                }   
+
+
+                
+                button_playagain.style.display = 'block'; 
+                }
+                }
+                       
+            }
+            grass3.onclick = function() {
+                if (gameMode === true){
+               if (grass3Bool === true && pokeballsLeft > 0){
+                
+                pokeballsLeft -= 1;
+                pokeballs_left.innerText = pokeballsLeft;
+
+                
+                let chance = Math.random(); 
+
+                
+                if (chance > 0.6) {
+                    grass3.src = `${pokemon[numGen].image}`;         
+                    resultsText.innerText = `You caught a(n) ${pokemon[numGen].name}`;
+                    pokemonCaught += 1;
+                    pokemon_caught.innerText = pokemonCaught;  
+                    grass3Bool = false;
+                    gameMode = false;
+                    resultsText2 = document.createElement('div');
+                    resultsText2.id = 'history';
+                    resultsText2.innerText = `You caught ${pokemon[numGen].name}`
+                    parentYes = document.getElementById('button_playagain');
+                    if (parentYes.nextSibling) {
+                    parentYes.parentNode.insertBefore(resultsText2, parentYes.nextSibling);
+                    }
+                    else {
+                    parentYes.parentNode.appendChild(resultsText2);
+                    }
+                }
+
+                
+                else if (chance >= 0.3) { 
+                    resultsText.innerText = 'You caught pokeballs!'; 
+                    grass3.src = `${ballArray[ballNum]}`;                       
+                    pokeballsLeft += parseInt(ballIncrease[ballNum]);
+                    pokeballs_left.innerText = pokeballsLeft;
+                    grass3Bool = false; 
+                    gameMode = false;
+                    resultsText2 = document.createElement('div');
+                    resultsText2.id = 'history';
+                    resultsText2.innerText = `You caught pokeballs`
+                    parentYes = document.getElementById('button_playagain');
+                    if (parentYes.nextSibling) {
+                    parentYes.parentNode.insertBefore(resultsText2, parentYes.nextSibling);
+                    }
+                    else {
+                    parentYes.parentNode.appendChild(resultsText2);
+                    }
+                }
+
+                
+                else {
+                    grass3.src = '';
+                    resultsText.innerText = 'You caught nothing :(';
+                    gameMode = false; 
+                    resultsText2 = document.createElement('div');
+                    resultsText2.id = 'history';
+                    resultsText2.innerText = `You caught nothing`
+                    parentYes = document.getElementById('button_playagain');
+                    if (parentYes.nextSibling) {
+                    parentYes.parentNode.insertBefore(resultsText2, parentYes.nextSibling);
+                    }
+                    else {
+                    parentYes.parentNode.appendChild(resultsText2);
+                    }                            
+                }   
+
+
+                
+                button_playagain.style.display = 'block'; 
+                }
+                }
+                       
+            }
+            
+
+
+
+        </script>
+    </body>
+</html>
+

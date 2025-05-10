@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Matching Game</title>
+        <style>
+            body {
+                background-color: #000;
+                color: #fff;
+                font-family: sans-serif;
+            }
+            .hidden {
+                display: none;
+            }
+            #token_container {
+                width: 400px;
+            }
+            #token_container img {
+                width: 100px;
+            }
+        </style>
+    </head>
+    <body>
+        <h1>Matching Game</h1>
+
+        <div id="panel_start">
+            <p>Play a fast-paced game of memory and try and beat your best time</p>
+            <button id="button_playgame">Play the Game</button>
+        </div>
+
+        <div id="panel_gameplaying" class="hidden">
+            <div>Time elapsed: <span id="time_elapsed">0</span></div>
+            <div id="token_container"></div>
+        </div>
+
+        <div id="panel_gameover" class="hidden"></div>
+
+        <script>
+            const panel_start = document.getElementById('panel_start');
+            const panel_gameplaying = document.getElementById('panel_gameplaying');
+            const panel_gameover = document.getElementById('panel_gameover');
+            const button_playgame = document.getElementById('button_playgame');
+            const time_elapsed = document.getElementById('time_elapsed');
+            const token_container = document.getElementById('token_container');
+
+            let inputBox = document.createElement('input');
+            inputBox.type = 'text';
+            panel_start.append(inputBox);
+
+            let boardSelector = document.createElement('select');
+            let threebyfour = document.createElement('option');
+            threebyfour.value = 12;
+            threebyfour.text = '3x4';
+            let fourbyfive = document.createElement('option');
+            fourbyfive.value = 20;
+            fourbyfive.text = '4x5';
+            let fivebysix = document.createElement('option');
+            fivebysix.value = 30;
+            fivebysix.text = '5x6';
+            boardSelector.append(threebyfour, fourbyfive, fivebysix);
+            panel_start.append(boardSelector);
+
+            let replayButton = document.createElement('button');
+            replayButton.innerHTML = 'Play Again?';
+
+            const win = new Audio("winsound.mp3");
+            const loss = new Audio("losesound.mp3");
+
+            function matchAudio() {
+                win.play();
+            }
+            function lossAudio() {
+                loss.play();
+            }
+
+            function buildScoreboard() {
+                let scoreBoard = [];
+                for (let i = 0; i < localStorage.length; i++) {
+                    let person = localStorage.key(i);
+                    let score = parseInt(localStorage.getItem(person));
+                    scoreBoard.push({ name: person, value: score });
+                }
+                scoreBoard.sort((a, b) => a.value - b.value);
+                return scoreBoard;
+            }
+
+            gamePlayFunction = function () {
+                let countNum = 0;
+                let matchNum = 0;
+                let token1 = false;
+                let token2 = false;
+                let keyNum = 0;
+                let timer = document.getElementById('time_elapsed');
+                token_container.innerHTML = '';
+                panel_gameover.innerHTML = '';
+                panel_start.classList.add('hidden');
+                panel_gameplaying.classList.remove('hidden');
+
+                function countUp() {
+                    countNum += 1;
+                    timer.innerHTML = countNum;
+                }
+
+                let timeNum = setInterval(countUp, 1000);
+                let recordTime;
+
+                const allAssets = [
+                    'snorlax.png', 'electrabuzz.png', 'chansey.png', 'oddish.png',
+                    'pikachu.png', 'paras.png', 'arcanine.png', 'ponita.png',
+                    'venonat.png', 'eggsecute.png', 'machop.png', 'pidgey.png',
+                    'psyduck.png', 'tauros.png', 'vulpix.png', 'gloom.png',
+                    'krabby.png', 'butterfree.png', 'bulbasaur.png', 'clefairy.png',
+                    'koffing.png', 'goldeen.png', 'magikarp.png', 'beedrill.png',
+                    'lapras.png', 'meowth.png', 'ekans.png', 'jigglypuff.png',
+                    'horsea.png', 'polywog.png', 'sandshrew.png', 'rattata.png',
+                    'gengar.png', 'eevee.png', 'bellsprout.png', 'squirtle.png',
+                    'seel.png', 'caterpie.png'
+                ];
+
+                const assets = [...allAssets];
+                const selectedImages = [];
+                const boardSize = parseInt(boardSelector.value);
+
+                if (boardSize === 20) {
+                    token_container.style.width = '500px';
+                } else if (boardSize === 30) {
+                    token_container.style.width = '600px';
+                } else {
+                    token_container.style.width = '400px';
+                }
+
+                for (let i = 0; i < boardSize / 2; i++) {
+                    let index = Math.floor(Math.random() * assets.length);
+                    selectedImages.push(assets[index], assets[index]);
+                    assets.splice(index, 1);
+                }
+
+                const indices = Array.from({ length: boardSize }, (_, i) => i);
+                for (let i = selectedImages.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [selectedImages[i], selectedImages[j]] = [selectedImages[j], selectedImages[i]];
+                }
+
+                for (let image of selectedImages) {
+                    const el = document.createElement('img');
+                    el.dataset.secretimage = `media/${image}`;
+                    el.src = 'media/pokeball.png';
+                    token_container.appendChild(el);
+
+                    el.onclick = function () {
+                        if (el.src.includes(el.dataset.secretimage)) return;
+
+                        if (!token1) {
+                            el.src = el.dataset.secretimage;
+                            token1 = el;
+                        } else if (!token2) {
+                            el.src = el.dataset.secretimage;
+                            if (token1 === el) {
+                                setTimeout(() => {
+                                    token1.src = 'media/pokeball.png';
+                                    token1 = false;
+                                    token2 = false;
+                                }, 1000);
+                                return;
+                            }
+                            token2 = el;
+
+                            if (token1.dataset.secretimage === token2.dataset.secretimage) {
+                                token1 = false;
+                                token2 = false;
+                                matchNum++;
+                                matchAudio();
+
+                                if (matchNum === boardSize / 2) {
+                                    recordTime = countNum;
+                                    clearInterval(timeNum);
+
+                                    localStorage.setItem(inputBox.value, recordTime);
+                                    let updatedBoard = buildScoreboard();
+
+                                    panel_gameplaying.classList.add('hidden');
+                                    panel_gameover.classList.remove('hidden');
+
+                                    panel_gameover.innerHTML = `
+                                    <div>Your time: <span id="time_yourtime">${recordTime}</span></div>
+                                    <div>Best time: <span id="time_besttime">${updatedBoard[0].value}</span></div>
+                                    `;
+
+
+                                    if (scoreBoard.length >= 3) {
+                                        const leaderBoard = document.createElement('div');
+                                        leaderBoard.innerText = `Top 3 Wins:
+                                        1. ${scoreBoard[0].name}, ${scoreBoard[0].value} 
+                                        2. ${scoreBoard[1].name}, ${scoreBoard[1].value} 
+                                        3. ${scoreBoard[2].name}, ${scoreBoard[2].value}`;
+                                        panel_gameover.appendChild(leaderBoard);
+                                    }
+
+                                    panel_gameover.appendChild(replayButton);
+                                }
+                            } else {
+                                setTimeout(() => {
+                                    token1.src = 'media/pokeball.png';
+                                    token2.src = 'media/pokeball.png';
+                                    token1 = false;
+                                    token2 = false;
+                                    lossAudio();
+                                }, 1000);
+                            }
+                        }
+                    };
+                }
+            };
+
+            button_playgame.onclick = gamePlayFunction;
+            replayButton.onclick = gamePlayFunction;
+        </script>
+    </body>
+</html>

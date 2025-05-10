@@ -1,0 +1,468 @@
+<!DOCTYPE html> 
+<html>
+    <head>
+        <title>Assignment 05</title>
+        <style>
+            body {
+                background-image: url('images/corkboard.jpg');
+            }
+            #filter {
+                position: absolute;
+                top: 20px;
+                right: 20px;
+            }
+            #button_add_event {
+                position: absolute;
+                bottom: 20px;
+                right: 20px;
+                width: 50px;
+                height: 50px;
+            }
+            #button_add_event:hover {
+                bottom: 15px;
+                right: 15px;
+                width: 60px;
+                height: 60px;
+            }
+
+            #modal_add_event {
+                box-sizing: border-box;
+                padding: 20px;
+                width: 300px;
+                height: 400px;
+                background-color: #fff;            
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                margin-left: -150px;
+                margin-top: -200px;
+            }
+            .hidden {
+                display: none;
+            }
+            .item {
+                width: 100px;
+                height: 100px;
+                border: 1px solid black;
+                float: left;
+                margin: 10px;
+            }
+            .spring {
+                background-color: lightgreen;                
+            }
+            .summer {
+                background-color: yellow;
+            }
+            .fall {
+                background-color: orange;
+            }
+            .winter {
+                background-color: lightblue;
+            }
+        </style>
+    </head>
+    <body>
+        <h1>Seasonal To-Do List</h1>
+
+        <!-- drop down filter
+             add new event button
+             modal box for adding an event 
+             modal box for viewing an event -->
+
+        <select id="filter">
+            <option value="">Select a season</option>
+            <option value="spring">Spring</option>
+            <option value="summer">Summer</option>
+            <option value="fall">Fall</option>
+            <option value="winter">Winter</option>
+        </select>
+
+        <img id="button_add_event" src="images/add_button.png"></img>
+
+        <div id="modal_add_event" class="hidden">
+            <h2>Add New Event</h2>
+            <form>
+                <div>
+                    <label for="modal_add_event_title">Title:</label>
+                    <input type="text" id="modal_add_event_title">
+                </div>
+                <div>
+                    <label for="modal_add_event_season">Season</label>
+                    <select id="modal_add_event_season">
+                        <option value="">Select a season</option>
+                        <option value="spring">Spring</option>
+                        <option value="summer">Summer</option>
+                        <option value="fall">Fall</option>
+                        <option value="winter">Winter</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="modal_add_event_content">Content</label>
+                    <textarea id="modal_add_event_content"></textarea>                    
+                </div>
+                <div>
+                    <button id="modal_add_event_save">Save</button>
+                    <button id="modal_add_event_cancel">Cancel</button>
+                </div>
+            </form>
+        </div>
+
+        <div id="existing_items">            
+
+        </div>
+
+        <script>
+            // DOM queries
+            const button_add_event = document.querySelector('#button_add_event');
+            const modal_add_event = document.querySelector('#modal_add_event');
+            const modal_add_event_cancel = document.getElementById('modal_add_event_cancel');
+            const save_button = document.getElementById('modal_add_event_save');
+
+            let informationDiv = document.createElement('div');
+                    informationDiv.style['box-sizing'] = 'border-box';
+                    informationDiv.style['padding'] = '20px';
+                    informationDiv.style['width'] = '300px';
+                    informationDiv.style['min-height'] = '200px';
+                    informationDiv.style['height'] = 'auto';
+                    informationDiv.style['background-color'] = '#fff';
+                    informationDiv.style['position'] = 'absolute';
+                    informationDiv.style['top'] = '50%';
+                    informationDiv.style['left'] = '50%';
+                    informationDiv.style['margin-left'] = '-150px';
+                    informationDiv.style['margin-top'] = '-200px';
+            informationDiv.classList.add('hidden');
+            let informationDiv_close_button = document.createElement('button');
+            informationDiv_close_button.innerHTML = 'Close';
+            let secondaryDiv = document.createElement('div');
+
+            informationDiv.appendChild(informationDiv_close_button);
+            informationDiv.appendChild(secondaryDiv);
+
+            warningDiv = document.createElement('div');
+            warningDiv.style.width = '75%';
+            warningDiv.style.height = '35px';
+            warningDiv.style.backgroundColor = 'red';
+            warningDiv.innerText = 'Please fill in all fields';
+            warningDiv.classList.add('hidden');
+            modal_add_event.appendChild(warningDiv);
+
+            
+            
+            modal_add_event.insertBefore(warningDiv, modal_add_event.children[1]);
+            console.log(modal_add_event.children);
+
+            informationDiv_close_button.onclick = function(){
+                informationDiv.classList.add('hidden');
+            }
+            //let body = document.querySelector('body');
+            //console.log(body)
+            document.body.appendChild(informationDiv);
+
+            button_add_event.onclick = function(event) {
+                modal_add_event.classList.remove('hidden');
+            }
+            modal_add_event_cancel.onclick = function(event) {
+                event.preventDefault();
+                modal_add_event.classList.add('hidden');
+            }
+            modal_add_event_save.onclick = function(event) {
+                event.preventDefault();
+
+                // access the title 
+                const title = document.querySelector('#modal_add_event_title').value;
+                // access the season
+                const season = document.querySelector('#modal_add_event_season').value;
+
+                // access the content 
+                const content = document.querySelector('#modal_add_event_content').value;
+
+
+                console.log(title, season, content);
+
+                if (title !== "" || content !== ""){
+                warningDiv.classList.add('hidden');
+
+                const el = document.createElement('div');
+                el.classList.add('item');
+                el.style.border = '0px';
+                el.style.padding = '5px';
+                el.classList.add(season);
+                el.innerText = title;
+                el.style.fontFamily = 'Arial';
+                el.style.position = 'relative';
+                el.dataset.content = content;
+                el.dataset.date = (new Date()).toString();
+                
+                let deleteButton = document.createElement('img');
+                deleteButton.src = 'images/delete_button.png';
+                deleteButton.style.width = '15px';
+                deleteButton.style.height = '15px';
+                deleteButton.style.position = 'absolute';
+                deleteButton.style.top = '0px';
+                deleteButton.style.left = '100px';
+                deleteButton.style.visibility = 'hidden';
+                el.appendChild(deleteButton);
+
+                let editButton = document.createElement('button');
+                editButton.innerHTML = 'edit';
+                editButton.classList.add('hidden');
+                el.appendChild(editButton);
+
+                let editPortal = document.createElement('div');
+                editPortal.style.width = '300px';
+                editPortal.style.height = '300px';
+                editPortal.style.backgroundColor = '#EEE';
+                editPortal.style['box-sizing'] = 'border-box';
+                editPortal.style.position = 'absolute';
+                editPortal.style.top = '50%';
+                editPortal.style.left = '50%';
+                editPortal.style['margin-left'] = '-150px';
+                editPortal.style['margin-top'] = '-200px';
+                editPortal.style.fontFamily = 'Arial';
+                editPortal.style.fontSize = '14px';
+                editPortal.style.padding = '5px';
+
+                let editTitleDiv = document.createElement('div');
+                let editTitleText = document.createElement('p');
+                editTitleText.innerHTML = 'Edit Title';
+                editTitleDiv.appendChild(editTitleText);
+
+                let editTitle = document.createElement('input');
+                editTitle.type = 'text';
+                editTitleDiv.appendChild(editTitle);
+                
+                let editSeasonDiv = document.createElement('div');
+                let editSeasonText2 = document.createElement('p');
+                editSeasonText2.innerHTML = 'Edit Season';
+                editSeasonDiv.appendChild(editSeasonText2);
+                let editSeason = document.createElement('select');
+                let editSeasonText = document.createElement('option');
+                editSeasonText.value = '';
+                editSeasonText.innerText = 'Select a Season';
+                let editSpring = document.createElement('option');
+                editSpring.value = 'spring';
+                editSpring.innerText = 'Spring';
+                let editWinter = document.createElement('option');
+                editWinter.value = 'winter';
+                editWinter.innerText = 'Winter';
+                let editSummer = document.createElement('option');
+                editSummer.value = 'summer';
+                editSummer.innerText = 'Summer';
+                let editFall = document.createElement('option');
+                editFall.value = 'fall';
+                editFall.innerText = 'Fall';
+
+                let editedSeason = season;
+                editSeason.appendChild(editSeasonText);
+                editSeason.appendChild(editSpring);
+                editSeason.appendChild(editSummer);
+                editSeason.appendChild(editFall);
+                editSeason.appendChild(editWinter);
+                editSeasonDiv.appendChild(editSeason);
+
+                let editContentDiv = document.createElement('div');
+                let editContentText = document.createElement('p');
+                editContentText.innerHTML = 'Edit Content';
+                editContentDiv.appendChild(editContentText);
+                let editContent = document.createElement('textarea');
+                editContentDiv.appendChild(editContent);
+
+                let editSaveButton = document.createElement('button');
+                editSaveButton.innerText = 'Save';
+
+                editPortal.appendChild(editTitleDiv);
+                editPortal.appendChild(editSeasonDiv);
+                editPortal.appendChild(editContentDiv);
+                editPortal.appendChild(editSaveButton);
+                editPortal.classList.add('hidden');
+                
+
+                el.onmouseover = function(event){
+                deleteButton.style.visibility = 'visible';
+                editButton.classList.remove('hidden');
+                console.log(deleteButton.src);
+                }
+                el.onmouseout = function(event){
+                deleteButton.style.visibility = 'hidden';
+                editButton.classList.add('hidden');
+                }
+
+                deleteButton.onclick = function(event){
+                event.stopPropagation();
+                el.remove();
+                }
+                
+
+                editButton.onclick = function(event){
+                
+
+                event.stopPropagation();
+                document.body.appendChild(editPortal);
+                editPortal.classList.remove('hidden');
+                editTitle.value = el.firstChild.textContent;
+                editSeason.value = season;
+                editContent.value = el.dataset.content;
+                ;
+
+                editSaveButton.onclick = function(event){
+                event.preventDefault();
+                
+                el.firstChild.textContent = editTitle.value;
+                el.dataset.content = editContent.value;
+                editedSeason = editSeason.value ;
+                el.classList.remove('spring');
+                el.classList.remove('summer');
+                el.classList.remove('fall');
+                el.classList.remove('winter');
+                el.classList.add(editSeason.value);
+                editPortal.classList.add('hidden');
+                console.log(editPortal.classList);
+                }
+
+                }
+
+
+                // add to-do item to the DOM
+                document.getElementById('existing_items').appendChild(el);
+                modal_add_event.classList.add('hidden');
+
+                document.querySelector('#modal_add_event_title').value = "";
+                document.querySelector('#modal_add_event_season').value = "";
+                document.querySelector('#modal_add_event_content').value = "";
+
+                // set up a click handler
+                el.onclick = function(event) {
+                   //event.stopPropagation();
+                   let oldDate = '';
+
+                   displayDate = window.localStorage.getItem(oldDate);
+                   event.currentTarget.dataset.dateAccessed = (new Date()).toString();
+                   window.localStorage.setItem(oldDate, event.currentTarget.dataset.dateAccessed);
+
+                    console.log(event.currentTarget.dataset.content);
+                    informationDiv.classList.remove('hidden');
+                    secondaryDiv.innerHTML = `Title: <br> ${el.firstChild.textContent} <br> <br>` + `Content: <br> ${event.currentTarget.dataset.content} <br> <hr>` + `For the ${editedSeason} season <br><br>` + 
+                    `Created on: <br> ${event.currentTarget.dataset.date} <br><br>` + 
+                    `Last Date Accessed: <br> ${displayDate}`;
+
+                }
+
+                } else {
+                warningDiv.classList.remove('hidden');
+                }
+            }
+
+            let seasonFilter = document.getElementById('filter');
+            
+            
+            seasonFilter.onchange = function(event){
+            let selectedSeason = this.value;
+            let springList = document.querySelectorAll('.spring');
+            let fallList = document.querySelectorAll('.fall');
+            let winterList = document.querySelectorAll('.winter');
+            let summerList = document.querySelectorAll('.summer');
+
+                if (selectedSeason === 'spring'){
+                for(let i = 0; i < fallList.length; i++){
+                fallList[i].classList.add('hidden');
+                }
+                for(let i = 0; i < winterList.length; i++){
+                winterList[i].classList.add('hidden');
+                }
+                for(let i = 0; i < summerList.length; i++){
+                summerList[i].classList.add('hidden');
+                }
+                for (let i = 0; i < springList.length; i++){
+                    springList[i].classList.remove('hidden');
+                }
+                }
+
+                if (selectedSeason === 'summer'){
+                for(let i = 0; i < fallList.length; i++){
+                fallList[i].classList.add('hidden');
+                }
+                for(let i = 0; i < winterList.length; i++){
+                winterList[i].classList.add('hidden');
+                }
+                for(let i = 0; i < springList.length; i++){
+                springList[i].classList.add('hidden');
+                }
+                for (let i = 0; i < summerList.length; i++){
+                    summerList[i].classList.remove('hidden');
+                }
+                }
+
+                if (selectedSeason === 'winter'){
+                for(let i = 0; i < fallList.length; i++){
+                fallList[i].classList.add('hidden');
+                }
+                for(let i = 0; i < summerList.length; i++){
+                summerList[i].classList.add('hidden');
+                }
+                for(let i = 0; i < springList.length; i++){
+                springList[i].classList.add('hidden');
+                }
+                for (let i = 0; i < winterList.length; i++){
+                    winterList[i].classList.remove('hidden');
+                }
+                }
+
+                if (selectedSeason === 'fall'){
+                for(let i = 0; i < winterList.length; i++){
+                winterList[i].classList.add('hidden');
+                }
+                for(let i = 0; i < summerList.length; i++){
+                summerList[i].classList.add('hidden');
+                }
+                for(let i = 0; i < springList.length; i++){
+                springList[i].classList.add('hidden');
+                }
+                for (let i = 0; i < fallList.length; i++){
+                    fallList[i].classList.remove('hidden');
+                }
+                }
+
+                if (selectedSeason === ''){
+                    for(let i = 0; i < winterList.length; i++){
+                winterList[i].classList.remove('hidden');
+                }
+                for(let i = 0; i < summerList.length; i++){
+                summerList[i].classList.remove('hidden');
+                }
+                for(let i = 0; i < springList.length; i++){
+                springList[i].classList.remove('hidden');
+                }
+                for (let i = 0; i < fallList.length; i++){
+                    fallList[i].classList.remove('hidden');
+                }
+                }
+
+            }
+
+            //JavaCSSscript
+
+            let h1tag = document.querySelector('h1');
+            h1tag.style.color = 'white';
+            h1tag.style.fontFamily = 'Arial';
+            h1tag.style.textAlign = 'center';
+
+            let modal1 = document.getElementById('modal_add_event');
+            modal1.style.fontFamily = 'Arial';
+            modal1.style.borderRadius = '50px';
+            modal1.style.zIndex = '5';
+
+            secondaryDiv.style.fontFamily = 'Arial';
+            secondaryDiv.style.fontSize = '12px';
+            informationDiv.style.borderRadius = '50px';
+            informationDiv.style.backgroundColor = '#eeffff'
+
+            
+
+            
+            //editContent.style.margin = 'auto';
+
+            
+            
+        </script>
+    </body>
+</html>

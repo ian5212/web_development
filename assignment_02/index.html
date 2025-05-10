@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title></title>
+        <style>
+            #container {
+                border: 5px solid black;
+                width: 800px;
+                height: 600px;
+                position: relative;
+                margin: auto; 
+            }
+
+            #background {
+                width: 100%;
+                height: 100%;
+                position: absolute;
+                z-index: 0;
+            }
+
+            #title {
+                position: absolute;
+                z-index: 1;
+                left: 20px;
+            }
+
+            #time {
+                position: absolute;
+                z-index: 1;
+                left: 20px;
+                top: 150px;
+                background-color: #eee;
+                padding: 10px;
+                border-radius: 20px;
+            }
+
+            #body {
+                position: absolute;
+                z-index: 1;
+                right: 0px;
+                bottom: 0px;
+            }
+
+            #head {
+                position: absolute;
+                z-index: 1;
+                right: 70px;
+                bottom: 275px;
+            }
+
+            h1 {
+             color: #fff;
+            }
+        </style>
+    </head>
+    <body>
+        <script>
+            let value = prompt("Please enter a number equal to or greater than 3");
+
+            while (isNaN(value) || parseInt(value) < 3) {
+                value = prompt("Please enter a valid number equal to or greater than 3");
+            }
+
+            let numArray = []; 
+            let luckyNumber1, luckyNumber2, luckyNumber3;
+
+            for (let i = 0; i < parseInt(value); i++) {
+                numArray.push(i);
+            }
+
+            luckyNumber1 = numArray.splice(Math.floor(Math.random() * numArray.length), 1)[0];
+            luckyNumber2 = numArray.splice(Math.floor(Math.random() * numArray.length), 1)[0];
+            luckyNumber3 = numArray.splice(Math.floor(Math.random() * numArray.length), 1)[0];
+
+            const words = ['Awesome', 'Fantastic', 'Fabulous', 'Superb', 'Perfect', 'Brilliant', 'Coming up Roses'];
+            const greeting = words[parseInt(Math.random() * words.length)];
+
+            let currentTime = new Date();
+            let hours = parseInt(currentTime.getHours());
+            let meridian = 'am';
+            
+            let dayTime;
+
+            if (hours >= 0 && hours < 6) {
+                dayTime = 'night';
+            } else if (hours >= 6 && hours < 12) {
+                dayTime = 'morning';
+            } else if (hours >= 12 && hours < 18) {
+                dayTime = 'afternoon';
+            } else if (hours >= 18 && hours < 24) {
+                dayTime = 'evening';
+            }
+
+            if (hours > 12) {
+                hours = hours % 12;
+                meridian = 'pm';
+            }
+
+            let heads = ['head1', 'head2', 'head3', 'head4', 'head5', 'head6'];
+            let bodies = ['body1', 'body2', 'body3', 'body4', 'body5', 'body6'];
+
+            let randomHead = heads[parseInt(Math.random() * heads.length)];
+            let randomBody = bodies[parseInt(Math.random() * bodies.length)];
+
+            let minutes = currentTime.getMinutes();
+            
+            if (minutes < 10){
+                minutes = '0' + minutes
+            } 
+            document.write(`
+                <div id="container">
+                    <h1 id="title">Everything is ${greeting}</h1>
+                    <div id="time">
+                        The current time is ${hours}:${minutes} ${meridian} - Good ${dayTime}! <br>
+                        Your lucky numbers are ${luckyNumber1}, ${luckyNumber2}, ${luckyNumber3}.
+                    </div>
+                    <img id="background" src="images/backgrounds/${dayTime}.png">
+                    <img id="body" src="images/bodies/${randomBody}.png">
+                    <img id="head" src="images/heads/${randomHead}.png">
+                </div>
+            `);
+
+            let pageBody = document.querySelector("body");
+            document.documentElement.style.height = '100%';
+            pageBody.style.height = '100%';
+            pageBody.style.backgroundImage = `url("images/backgrounds/${dayTime}.png")`;
+            pageBody.style.backgroundRepeat = 'no-repeat';
+            pageBody.style.backgroundSize = 'cover';
+            pageBody.style.backgroundColor = 'rgba(0,0,0,0.7)';
+            pageBody.style.backgroundBlendMode = 'darken';
+
+        </script>
+    </body>
+</html>
