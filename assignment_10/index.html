@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>To Do List with Vue</title>
+
+    <!-- Provided stylesheet -->
+    <link rel="stylesheet" href="styles.css">
+
+    <!-- Load in the Vue library -->
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+
+    <!-- Load in our helpers library, which lets us make fetch requests -->
+    <script src="helpers.js"></script>
+</head>
+
+<body>
+
+    <h1>To Do List with Vue</h1>
+
+    <!-- The root element for our Vue app-->
+    <div id="app">
+
+        <!-- Toolbar -->
+        <div class="toolbar">
+            <button class="primary" @click="showAddNewItemPanel">Add Item</button>
+            <button class="primary" @click="saveTheList">Save To-Do List</button>
+            <select v-model="filter" @change="filterSystem(filter)">
+                <option>Show All</option>
+                <option v-for="(color, item) in allCategories" :key="item" :value="item">{{item}}</option>
+            </select>
+        </div>
+
+        <!-- Panel: Add New Item -->
+        <div class="panel" id="panelAddItem" v-if="isAddPanelVisible">
+            <button class="close-button light" @click="hideAddNewItemPanel">✕</button>
+            <h2>Add New Item</h2>
+
+            <div class="error-message" v-if="isAddPanelErrorMessageVisible">
+                Please fill out the form fully.
+            </div>
+
+            <div class="form-row">
+                <label for="itemTitle">Title</label>
+                <input type="text" id="itemTitle" v-model="addNewItemTitle">
+            </div>
+            <div class="form-row">
+                <label for="itemDescription">Description</label>
+                <textarea id="itemDescription" rows="3" v-model="addNewItemDescription"></textarea>
+            </div>
+            <div class="form-row">
+                <label for="itemCategory">Category</label>
+                <select id="itemCategory" v-model="addNewItemCategory">
+
+                    <!-- Sample category, replace with your own dynamically -->
+                    <option v-for="(color, item) in allCategories" :key="item" :value="item">{{item}}</option>
+                </select>
+            </div>
+            <button class="secondary" @click="saveNewItem">Save Item</button>
+        </div>
+
+        <!-- Panel: Edit Existing Item -->
+        <div class="panel" id="panelEditItem" v-if="isEditPanelVisible">
+            <button class="close-button light" @click="hideAddNewItemPanel">✕</button>
+            <h2>Edit Item</h2>
+
+            <div class="error-message" v-if="isAddPanelErrorMessageVisible">
+                Please fill out the form fully.
+            </div>
+
+            <div class="form-row">
+                <label for="editTitle">Title</label>
+                <input type="text" id="editTitle" v-model="updateItemTitle">
+            </div>
+            <div class="form-row">
+                <label for="editDescription">Description</label>
+                <textarea id="editDescription" rows="3" v-model="updateItemDescription"></textarea>
+            </div>
+            <div class="form-row">
+                <label for="editCategory">Category</label>
+                <select id="editCategory" v-model="updateItemCategory">
+
+                    <!-- Sample category, replace with your own dynamically -->
+                    <option v-for="(color, item) in allCategories" :key="item" :value="item">{{item}}</option>
+
+                </select>
+            </div>
+            <button class="secondary" @click="updateItem">Update Item</button>
+        </div>
+
+        <!-- Panel for Existing To-Do Items -->
+        <div class="todo-grid" id="panelExistingToDoItems" v-if="isExistingToDoListPanel">
+
+            <div class="todo-card" v-for="(item, index) in filteredItems" :key="item.id" :class="{complete: item.completed}">
+                <span class="category-tag" :style="{backgroundColor: allCategories[item.category]}">{{item.category}}</span>
+                <h3>{{item.title}}</h3>
+                <p>{{item.description}}</p>
+
+                <div class="card-actions">
+                    <button class="light" v-if="isCompleteVisible" @click="editItem(item)">Edit</button>
+                    <button class="light">
+                        <span v-if="!item.completed" @click="itemComplete(item)">Mark as Complete</span>
+                        <span v-if="item.completed" @click="itemActive(item)">Mark as Active</span>
+                    </button>
+                    <button class="light" @click="deleteItem(index)">Delete</button>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- Your application code -->
+    <script>
+        Vue.createApp({
+            data: function() {
+                return {
+                    isAddPanelVisible: false,
+                    isEditPanelVisible: false,
+                    isExistingToDoListPanel: true,
+                    isAddPanelErrorMessageVisible: false,
+                    isCompleteVisible: true,
+                    selectedItem: null,
+
+                    addNewItemTitle: '',
+                    addNewItemDescription: '',
+                    addNewItemCategory: '',
+
+                    updateItemTitle: '',
+                    updateItemDescription: '',
+                    updateItemCategory: '',
+
+                    savedToDoList: '',
+                    filter: 'Show All',
+                    filteredItems: [],
+                    
+                    allCategories: {'Personal': '#C49102', 
+                        'School': 'blue', 
+                        'Home': 'red', 
+                        'Work': 'navy', 
+                        'Play': 'orange'},
+
+                    existingItems: [
+                        {
+                            id: crypto.randomUUID(),
+                            title: 'Walk the dog',
+                            description: 'Take the dog out after work',
+                            category: 'Personal',
+                            completed: false,
+                        }
+                    ]           
+                }
+            },
+
+            methods: {
+                showAddNewItemPanel: function() {
+                    this.isAddPanelVisible = true;
+                    this.isExistingToDoListPanel = false;
+                    this.isEditPanelVisible = false;
+                },
+
+                hideAddNewItemPanel: function() {
+                    this.isAddPanelVisible = false;
+                    this.isExistingToDoListPanel = true; 
+                    this.isEditPanelVisible = false;               
+                },
+
+                saveNewItem: function() {
+                    if (this.addNewItemTitle.length == 0 || this.addNewItemDescription.length == 0 || this.addNewItemCategory.length == 0) {
+                        this.isAddPanelErrorMessageVisible = true;
+                        return;
+                    }
+
+                    this.isAddPanelErrorMessageVisible = false;
+
+                    this.existingItems.push({
+                        id: crypto.randomUUID(),
+                        title: this.addNewItemTitle,
+                        description: this.addNewItemDescription,
+                        category: this.addNewItemCategory,
+                        completed: false
+                    });
+                    this.filterSystem(this.filter); 
+
+                    this.addNewItemTitle = '';
+                    this.addNewItemDescription = '';
+                    this.addNewItemCategory = '';
+                    this.isAddPanelVisible = false;
+                    this.isExistingToDoListPanel = true;
+
+                                   
+                },
+
+                deleteItem: function(index) {
+                    this.existingItems.splice(index, 1);
+                    this.filterSystem(this.filter);
+                },
+
+                itemComplete: function(item) {
+                    item.completed = true;
+                    this.isCompleteVisible = false;
+                },
+
+                itemActive: function(item) {
+                    item.completed = false;
+                    this.isCompleteVisible = true;
+                },
+
+                editItem: function(item) {
+                    this.selectedItem = item
+                    this.isEditPanelVisible = true;
+                    this.isExistingToDoListPanel = false;
+                    this.updateItemTitle = item.title;
+                    this.updateItemDescription = item.description;
+                    this.updateItemCategory = item.category;
+                },
+
+                updateItem: function() {
+                    if (this.updateItemTitle.length == 0 || this.updateItemDescription.length == 0 || this.updateItemCategory.length == 0) {
+                        this.isAddPanelErrorMessageVisible = true;
+                        return;
+                    }
+
+                    if (this.selectedItem) {
+                        this.selectedItem.title = this.updateItemTitle;
+                        this.selectedItem.description = this.updateItemDescription;
+                        this.selectedItem.category = this.updateItemCategory;
+                    }
+
+                    this.isEditPanelVisible = false;
+                    this.isExistingToDoListPanel = true;
+                },
+
+                filterSystem: function(filter) {
+                    if (filter === '' || filter === 'Show All') {
+                        this.filteredItems = this.existingItems;
+                    } else {
+                        let result = [];
+                        for (let i = 0; i < this.existingItems.length; i++) {
+                            if (this.existingItems[i].category === filter) {
+                                result.push(this.existingItems[i]);
+                            }
+                        }
+                        this.filteredItems = result;
+                    }
+                },
+
+                saveTheList: function () {
+                    const savedList = JSON.stringify(this.existingItems);
+
+                    performFetch({
+                        url: 'save_todo_list.php',
+                        method: 'POST',
+                        data: {
+                            list: savedList
+                        },
+                         success: function(data) {
+                            console.log("SUCCESS: " + data);
+                         },
+                        error: function(err) {
+                            console.log("ERROR: " + err);
+                         }
+                    });
+                }
+                },
+
+            mounted: function () {
+                performFetch({
+                    url: 'get_todo_list.php',
+                    method: 'GET',
+                    success: function(data) {
+                        let savedList = [];
+                        try {
+                            savedList = JSON.parse(data);
+                        } catch (e) {
+                            console.log("ERROR", e);
+                         }
+
+                        this.existingItems = savedList;
+                        this.filterSystem(this.filter);
+                    },
+                    error: function(err) {
+                console.log("ERROR:" + err);
+        }
+    });
+}
+
+        }).mount("#app");
+
+    </script>
+
+</body>
+
+</html>
+
